@@ -1,0 +1,24 @@
+name: Build Image and Upload to ECR
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr-public get-login-password --region eu-north-1 | docker login --username AWS --password-stdin public.ecr.aws/m0h3a3c2
+      - name: Build the Docker image
+        run: docker build -t public.ecr.aws/m0h3a3c2/djsushis-cool-erc-repo .
+      - name: Push the Docker image
+        run: docker push public.ecr.aws/m0h3a3c2/djsushis-cool-erc-repo
